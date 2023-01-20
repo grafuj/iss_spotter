@@ -37,7 +37,7 @@ const fetchMyIP = (callback) => {
 };
 
 const fetchCoordsByIP = (callback) => {
-  const url = "http://ipwho.is/42";
+  const url = "http://ipwho.is/" + ip;
   request(url, (error, response, body) => {
     if (error) {
       callback(error, null);
@@ -55,17 +55,57 @@ const fetchCoordsByIP = (callback) => {
       return;
     }
     console.log(data);
-    let myCoords = "";
-    myCoords += data.latitude + ", " + data.longitude;
+    let myCoords = {};
+    myCoords.latitude = data.latitude;
+    myCoords.longitude = data.longitude;
 
 
-    callback(null, myCoords); //its in an array and we want property description
+    callback(null, myCoords);
     return;
   });
 
 };
 //example return: { latitude: '49.27670', longitude: '-123.13000' }
 
+/**
+ * Makes a single API request to retrieve upcoming ISS fly over times the for the given lat/lng coordinates.
+ * Input:
+ *   - An object with keys `latitude` and `longitude`
+ *   - A callback (to pass back an error or the array of resulting data)
+ * Returns (via Callback):
+ *   - An error, if any (nullable)
+ *   - The fly over times as an array of objects (null if error). Example:
+ *     [ { risetime: 134564234, duration: 600 }, ... ]
+ */
+const fetchISSFlyOverTimes = (coords, callback) => {
+  const url = "https://iss-flyover.herokuapp.com/json/?lat=" + coords.latitude + "&lon=" + coords.longitude;
+  // console.log(url)
+  request(url, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+    // console.log(body);
+    const data = JSON.parse(body);
+    if (data.message !== "success") {
+      const msg = `Error Code: ${data.message} when fetching flyovers. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+    if (data === undefined) {
+      callback("Those aren't coords");
+      return;
+    }
+    // console.log(data);
+   
+    callback(null, data.response);
+    return;
+  });
+};
 
-//206.108.23.158
-module.exports = { fetchMyIP, fetchCoordsByIP };
+
+
+/* https://iss-flyover.herokuapp.com/json/?lat=49.2488091&lon=-122.9805104
+{"message":"success","request":{"datetime":1674173680,"latitude":49.2488091,"longitude":-122.9805104,"altitude":1,"number":5},"response":[{"risetime":1674243936,"duration":548},{"risetime":1674280336,"duration":194},{"risetime":1674316736,"duration":466},{"risetime":1674353136,"duration":350},{"risetime":1674389536,"duration":554}]}
+*/
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
