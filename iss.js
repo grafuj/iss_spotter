@@ -10,10 +10,7 @@ const request = require('request');
  */
 const fetchMyIP = (callback) => {
   // use request to fetch IP address from JSON API
-  //
-
   const url = "https://api.ipify.org/?format=json";
-
   request(url, (error, response, body) => {
     // inside the request callback ...
     // error can be set if invalid domain, user is offline, etc.
@@ -28,23 +25,47 @@ const fetchMyIP = (callback) => {
       callback(Error(msg), null);
       return;
     }
-
     const data = JSON.parse(body);
     // console.log(data);
     if (data === undefined) {
       callback("That's not an IP!");
       return;
     }
-
-
-    // console.log(typeof data) //string, object after parsing
-    // console.log(data);
     callback(null, data.ip); //its in an array and we want property description
     return;
   });
 };
 
-//
-//get {"ip":"206.108.23.158"}
-// from https://api.ipify.org/?format=json
-module.exports = { fetchMyIP };
+const fetchCoordsByIP = (callback) => {
+  const url = "http://ipwho.is/42"
+  request(url, (error, response, body) => {
+    if (error) {
+      callback(error, null);
+      return;
+    }
+    const data = JSON.parse(body);
+    // if non-200 status, assume server error
+    if (data.success === false) {
+      const msg = `Success Code: ${data.success} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+    if (data === undefined) {
+      callback("That's not an IP!");
+      return;
+    }
+    console.log(data);
+    let myCoords = "";
+    myCoords += data.latitude + ", " + data.longitude;
+
+
+    callback(null, myCoords); //its in an array and we want property description
+    return;
+  });
+
+}
+//example return: { latitude: '49.27670', longitude: '-123.13000' }
+
+
+//206.108.23.158
+module.exports = { fetchMyIP, fetchCoordsByIP };
