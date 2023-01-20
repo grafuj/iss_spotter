@@ -32,7 +32,7 @@ const printPassTimes = (array) => {
   console.log(`Next pass at ${array[2].risetime} (Pacific Daylight Time) for ${array[2].duration} seconds!`);
   console.log(`Next pass at ${array[3].risetime} (Pacific Daylight Time) for ${array[3].duration} seconds!`);
   console.log(`Next pass at ${array[4].risetime} (Pacific Daylight Time) for ${array[4].duration} seconds!`);
-}
+};
 
 module.exports = {
   fetchMyIP,
