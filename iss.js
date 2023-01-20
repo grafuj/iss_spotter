@@ -36,7 +36,7 @@ const fetchMyIP = (callback) => {
   });
 };
 
-const fetchCoordsByIP = (callback) => {
+const fetchCoordsByIP = (ip, callback) => {
   const url = "http://ipwho.is/" + ip;
   request(url, (error, response, body) => {
     if (error) {
@@ -54,7 +54,7 @@ const fetchCoordsByIP = (callback) => {
       callback("That's not an IP!");
       return;
     }
-    console.log(data);
+    // console.log(data);
     let myCoords = {};
     myCoords.latitude = data.latitude;
     myCoords.longitude = data.longitude;
@@ -97,15 +97,52 @@ const fetchISSFlyOverTimes = (coords, callback) => {
       return;
     }
     // console.log(data);
-   
+
     callback(null, data.response);
     return;
+  });
+};
+/* https://iss-flyover.herokuapp.com/json/?lat=49.2488091&lon=-122.9805104
+{"message":"success","request":{"datetime":1674173680,"latitude":49.2488091,"longitude":-122.9805104,"altitude":1,"number":5},"response":[{"risetime":1674243936,"duration":548},{"risetime":1674280336,"duration":194},{"risetime":1674316736,"duration":466},{"risetime":1674353136,"duration":350},{"risetime":1674389536,"duration":554}]}
+*/
+
+// iss.js
+/**
+ * Orchestrates multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
+ * Input:
+ *   - A callback with an error or results.
+ * Returns (via Callback):
+ *   - An error, if any (nullable)
+ *   - The fly-over times as an array (null if error):
+ *     [ { risetime: <number>, duration: <number> }, ... ]
+ */
+const nextISSTimesForMyLocation = (callback) => {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      console.log("It didn't work!", error);
+      return;
+    }
+    // console.log('It worked! Returned IP:', ip);
+
+    fetchCoordsByIP(ip, (error, coords) => {
+      if (error) {
+        console.log("It didn't work!", error.message);
+        return;
+      }
+      // console.log('It worked! Returned coords:', coords);
+
+      fetchISSFlyOverTimes(coords, (error, response) => {
+        if (error) {
+          console.log("Error encountered:", error);
+          return;
+        }
+        // console.log("It worked! Response:", response);
+        callback(error, response);
+      });
+    });
   });
 };
 
 
 
-/* https://iss-flyover.herokuapp.com/json/?lat=49.2488091&lon=-122.9805104
-{"message":"success","request":{"datetime":1674173680,"latitude":49.2488091,"longitude":-122.9805104,"altitude":1,"number":5},"response":[{"risetime":1674243936,"duration":548},{"risetime":1674280336,"duration":194},{"risetime":1674316736,"duration":466},{"risetime":1674353136,"duration":350},{"risetime":1674389536,"duration":554}]}
-*/
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
