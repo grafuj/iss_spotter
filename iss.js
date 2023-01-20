@@ -37,7 +37,7 @@ const fetchMyIP = (callback) => {
 };
 
 const fetchCoordsByIP = (callback) => {
-  const url = "http://ipwho.is/42"
+  const url = "http://ipwho.is/42";
   request(url, (error, response, body) => {
     if (error) {
       callback(error, null);
@@ -63,7 +63,7 @@ const fetchCoordsByIP = (callback) => {
     return;
   });
 
-}
+};
 //example return: { latitude: '49.27670', longitude: '-123.13000' }
 
 

@@ -11,7 +11,7 @@ const { fetchMyIP, fetchCoordsByIP } = require('./iss');
 // });
 
 fetchCoordsByIP((error, coords) => {
-  if(error) {
+  if (error) {
     console.log("It didn't work!", error.message);
     return;
   }
